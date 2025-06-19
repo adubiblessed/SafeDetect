@@ -1,5 +1,7 @@
 __pycache__/
 media/
+migrations/
+annotated/
 
 *.pt
 *.sqlite3
