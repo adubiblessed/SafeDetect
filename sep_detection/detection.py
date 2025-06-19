@@ -9,7 +9,7 @@ from datetime import datetime
 from ultralytics import YOLO  # YOLOv8
 
 # === Load YOLOv8 model ===
-model = YOLO("yolov8n.pt")  # Use 'yolov8s.pt' or higher for better accuracy
+model = YOLO("yolov8n.pt")  
 
 # === Load YuNet face detector ===
 face_detector = cv2.FaceDetectorYN.create(
@@ -28,8 +28,8 @@ TMP_DIR = "temp"
 os.makedirs(TMP_DIR, exist_ok=True)
 
 # === Telegram Settings ===
-TELEGRAM_TOKEN = '7933290460:AAEi5wSTxvkx4FAfxaYtgsp8z40PikygWkA'
-TELEGRAM_CHAT_ID = '6302368759'
+TELEGRAM_TOKEN = ''
+TELEGRAM_CHAT_ID = ''
 
 
 # === Telegram Sender ===
