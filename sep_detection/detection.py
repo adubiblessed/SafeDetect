@@ -23,7 +23,7 @@ face_detector = cv2.FaceDetectorYN.create(
 
 # === Constants ===
 SNAPSHOT_INTERVAL = 10  # seconds between snapshots
-API_URL = "http://127.0.0.1:8000/detection/api/detections/"
+API_URL = "http://127.0.0.1:8000/api/detections/"
 TMP_DIR = "temp"
 os.makedirs(TMP_DIR, exist_ok=True)
 

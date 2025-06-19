@@ -29,6 +29,7 @@ class Detection(models.Model):
 
 
 class Detection_new(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     uuid = models.CharField(max_length=100)
     snapshot = models.ImageField(upload_to='snapshots/')
     face_image = models.ImageField(upload_to='faces/')

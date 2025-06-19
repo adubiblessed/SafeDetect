@@ -105,6 +105,7 @@ from .serializers import DetectionSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import exception_handler
 
+
 @api_view(['POST'])
 def upload_detection_test(request):
     try:
@@ -124,4 +125,4 @@ def upload_detection_test(request):
 
 def dashboard_new(request):
     detections = Detection_new.objects.order_by('-timestamp')[:20]  # latest 20
-    return render(request, 'detection/test_new_method.html', {'detections': detections})
+    return render(request, 'detection/dashboard.html', {'detections': detections})

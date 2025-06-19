@@ -26,7 +26,7 @@ def login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 auth_login(request, user)
-                return redirect('dashboard:dashboard') 
+                return redirect('detection:dashboard') 
             else:
                 form.add_error(None, 'Invalid username or password.')
     return render(request, 'accounts/login.html', {'form': form})
