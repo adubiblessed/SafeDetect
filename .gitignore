@@ -4,5 +4,7 @@ migrations/
 annotated/
 temp/
 
+*.pyc
+
 *.pt
 *.sqlite3
