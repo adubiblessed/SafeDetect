@@ -2,6 +2,7 @@ __pycache__/
 media/
 migrations/
 annotated/
+temp/
 
 *.pt
 *.sqlite3
