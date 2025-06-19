@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Detection Success - SafeDetect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="max-w-2xl mx-auto mt-16 bg-white shadow-lg rounded-lg p-6">
+    <h1 class="text-2xl font-bold text-green-600 mb-4 text-center">Detection Completed ✅</h1>
+
+    <div class="space-y-2 text-sm">
+      <p><strong>Label Detected:</strong> {{ detection.label }}</p>
+      <p><strong>Confidence:</strong> {{ detection.confidence|floatformat:2 }}</p>
+      <p><strong>Time:</strong> {{ detection.timestamp|date:"Y-m-d H:i" }}</p>
+      <p><strong>Alert Triggered:</strong>
+        {% if detection.alert_triggered %}
+          <span class="text-red-600 font-semibold">Yes</span>
+        {% else %}
+          <span class="text-green-600 font-semibold">No</span>
+        {% endif %}
+      </p>
+      {% if detection.alert_message %}
+        <p><strong>Alert Message:</strong> {{ detection.alert_message }}</p>
+      {% endif %}
+    </div>
+
+    {% if detection.image %}
+      <div class="mt-6">
+        <p class="font-semibold mb-2">Uploaded Image:</p>
+        <img src="{{ detection.image.url }}" class="rounded border w-full" alt="Uploaded Image">
+      </div>
+
+      {% if detection.annotated_image %}
+        <div class="mt-4">
+          <p class="font-semibold mb-2">Annotated Face Detection:</p>
+          <img src="{{ detection.annotated_image.url }}" class="rounded border w-full" alt="Annotated Detection">
+        </div>
+      {% endif %}
+    {% elif detection.video %}
+      <div class="mt-6">
+        <p class="font-semibold mb-2">Uploaded Video:</p>
+        <video controls class="w-full rounded border">
+          <source src="{{ detection.video.url }}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    {% endif %}
+
+    <div class="mt-6 text-center">
+      <a href="{% url 'detection:upload_detection' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Upload Another
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

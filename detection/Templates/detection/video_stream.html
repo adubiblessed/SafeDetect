@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Person Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            text-align: center;
+            padding-top: 40px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .video-container {
+            display: inline-block;
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        video, img {
+            width: 640px;
+            height: auto;
+        }
+
+        #alert-box {
+            margin-top: 20px;
+            padding: 10px 20px;
+            display: none;
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            animation: fade 1s ease-in-out;
+        }
+
+        @keyframes fade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Real-time Person Detection</h1>
+    <div class="video-container">
+        <img src="{% url 'detection:video_feed' %}" alt="Live Stream">
+    </div>
+
+    <div id="alert-box">👤 Person Detected!</div>
+
+    <script>
+        function checkDetection() {
+            fetch("{% url 'detection:detection_status' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const alertBox = document.getElementById('alert-box');
+                    if (data.detected) {
+                        alertBox.style.display = 'inline-block';
+                        clearTimeout(window.alertTimeout);
+                        window.alertTimeout = setTimeout(() => {
+                            alertBox.style.display = 'none';
+                        }, 1500);
+                    }
+                });
+        }
+
+        setInterval(checkDetection, 100);
+    </script>
+</body>
+</html>

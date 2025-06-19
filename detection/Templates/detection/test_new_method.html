@@ -1,0 +1,33 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeDetect Dashboard</title>
+    <meta http-equiv="refresh" content="10">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+        h1 { text-align: center; color: #333; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card {
+            background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 15px; text-align: center;
+        }
+        img { max-width: 100%; height: auto; border-radius: 8px; }
+        .timestamp { color: #666; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>Intruder Detection Dashboard</h1>
+    <div class="card-grid">
+        {% for d in detections %}
+            <div class="card">
+                <img src="{{ d.snapshot.url }}" alt="Snapshot">
+                <img src="{{ d.face_image.url }}" alt="Face Image">
+                <div class="timestamp">Detected at: {{ d.timestamp }}</div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
