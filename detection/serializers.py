@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Detection_new  # not Detection
+from .models import Detection_new 
 
 class DetectionSerializer(serializers.ModelSerializer):
     class Meta:

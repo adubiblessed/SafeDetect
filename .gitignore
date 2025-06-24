@@ -4,7 +4,8 @@ migrations/
 annotated/
 temp/
 
+*.env
 *.pyc
 
-*.pt
+yolov8n.pt
 *.sqlite3

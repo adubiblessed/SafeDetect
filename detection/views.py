@@ -14,13 +14,13 @@ def upload_detection(request):
             instance.user = request.user
             instance.save()
 
-            # 🔁 Trigger YOLOv8 detection on the uploaded file
+            
             if instance.image:
                 result = run_yolo_detection(instance.image.path)
             else:
                 result = run_yolo_detection(instance.video.path)
 
-            # Save detection results
+           
             if result:
                 instance.label = result['label']
                 instance.confidence = result['confidence']
@@ -35,13 +35,13 @@ def upload_detection(request):
                 # Annotate the image and get path to annotated version
                     annotated_path = annotate_faces(instance.image.path, face_result['boxes'])
 
-                    # Update the Detection instance
+                    
                     instance.alert_triggered = True
                     instance.alert_message = f"{face_result['faces_detected']} face(s) detected in image."
 
                     # instance.annotated_image_path = annotated_path
 
-            # Optional: Save annotated path if you want
+            
             instance.save()
 
             return redirect('detection:detection_success')  
@@ -94,7 +94,7 @@ from django.shortcuts import render
 
 
 
-# views.py
+
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -102,8 +102,6 @@ from rest_framework import status
 from .models import Detection_new
 from .serializers import DetectionSerializer
 
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.views import exception_handler
 
 
 @api_view(['POST'])
@@ -124,5 +122,5 @@ def upload_detection_test(request):
 
 
 def dashboard_new(request):
-    detections = Detection_new.objects.order_by('-timestamp')[:20]  # latest 20
+    detections = Detection_new.objects.order_by('-timestamp')[:20]  
     return render(request, 'detection/dashboard.html', {'detections': detections})

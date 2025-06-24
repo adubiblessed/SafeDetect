@@ -1,30 +1,33 @@
 from ultralytics import YOLO
 
-model = YOLO("yolov8n.pt")
+
+model = YOLO("safe_detect 1.1.pt")
+
+# Only these classes should trigger an alert
+alert_classes = ["knife", "fire", "gun", "mask"]
 
 def run_yolo_detection(file_path):
-    results = model(file_path)[0]  # Get first image result
-    labels = results.names
-    boxes = results.boxes
+    results = model(file_path)[0]  
+    labels = results.names         
+    boxes = results.boxes          
 
     for box in boxes:
-        label_id = int(box.cls[0])
-        label = labels[label_id]
-        confidence = float(box.conf[0])
+        label_id = int(box.cls[0].item())       
+        label = labels[label_id]                
+        confidence = float(box.conf[0].item())  
 
-        # Only process 'person' class
-        if label == 'person' and confidence > 0.7:
+        if label in alert_classes and confidence > 0.5:
             return {
                 'label': label,
                 'confidence': confidence,
                 'alert': True,
-                'message': "Intruder detected"
+                'message': f"{label.upper()} detected!"
             }
 
-    # No person detected
+    # No threat classes detected
     return {
         'label': None,
         'confidence': 0.0,
         'alert': False,
-        'message': "No intruder detected"
+        'message': "No threat detected"
     }

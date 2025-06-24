@@ -6,12 +6,13 @@ import os
 from queue import Queue
 from threading import Thread
 from datetime import datetime
-from ultralytics import YOLO  # YOLOv8
+from dotenv import load_dotenv
+from ultralytics import YOLO  
 
-# === Load YOLOv8 model ===
-model = YOLO("yolov8n.pt")  
 
-# === Load YuNet face detector ===
+model = YOLO("safe_detect 1.1.pt")  
+
+
 face_detector = cv2.FaceDetectorYN.create(
     model="yunet.onnx",
     config="",
@@ -21,15 +22,16 @@ face_detector = cv2.FaceDetectorYN.create(
     top_k=5000
 )
 
-# === Constants ===
-SNAPSHOT_INTERVAL = 10  # seconds between snapshots
+
+SNAPSHOT_INTERVAL = 10  
 API_URL = "http://127.0.0.1:8000/api/detections/"
 TMP_DIR = "temp"
 os.makedirs(TMP_DIR, exist_ok=True)
 
-# === Telegram Settings ===
-TELEGRAM_TOKEN = ''
-TELEGRAM_CHAT_ID = ''
+
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 
 # === Telegram Sender ===
@@ -119,21 +121,21 @@ while cap.isOpened():
     if not ret:
         break
 
-    # Run YOLOv8 detection
-    results = model.predict(frame, classes=[0], conf=0.4)
-    person_detected = False
+    
+    results = model.predict(frame, classes=[0,1,2,3,4,5], conf=0.4)
+    face_detected = False
 
     for r in results:
         if len(r.boxes) > 0:
-            person_detected = True
+            face_detected = True
             for box in r.boxes:
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
             break
 
-    # Take snapshot every 10 seconds
+   
     current_time = time.time()
-    if person_detected and (current_time - last_snapshot_time > SNAPSHOT_INTERVAL):
+    if face_detected and (current_time - last_snapshot_time > SNAPSHOT_INTERVAL):
         snapshot_queue.put((frame.copy(), current_time))
         last_snapshot_time = current_time
 
@@ -142,7 +144,7 @@ while cap.isOpened():
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# === Cleanup ===
+
 cap.release()
 cv2.destroyAllWindows()
 snapshot_queue.put(None)
