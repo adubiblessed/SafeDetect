@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Profile Picture - SafeDetect{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fa fa-camera"></i> Upload Profile Picture</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fa fa-lightbulb"></i> How Face Authentication Works</h6>
+                        <ol>
+                            <li>Upload a clear photo of your face</li>
+                            <li>When motion is detected via camera, faces are compared</li>
+                            <li>If the detected face matches your photo, <strong>no alert</strong> is sent</li>
+                            <li>Only unknown faces trigger intruder alerts</li>
+                        </ol>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label for="{{ form.profile_picture.id_for_label }}" class="form-label fw-bold">
+                                Select Your Photo
+                            </label>
+                            <div class="custom-file-upload">
+                                {{ form.profile_picture }}
+                            </div>
+                            <small class="form-text text-muted d-block mt-2">
+                                📸 Accepted formats: JPEG, PNG, GIF, WebP<br>
+                                📏 Maximum size: 5MB<br>
+                                👤 Tip: Use a clear, frontal photo of your face for best results
+                            </small>
+                            {% if form.profile_picture.errors %}
+                                <div class="alert alert-danger small mt-2">
+                                    {% for error in form.profile_picture.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if user.profile_picture %}
+                            <div class="alert alert-warning">
+                                <strong>Current Photo:</strong>
+                                <div class="mt-2">
+                                    <img src="{{ user.profile_picture.url }}" alt="Current Profile Picture" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fa fa-upload"></i> Upload & Save
+                            </button>
+                        </div>
+
+                        <div class="mt-2">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary w-100">
+                                <i class="fa fa-arrow-left"></i> Back to Profile
+                            </a>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <!-- Photography Tips -->
+                    <div class="alert alert-light border">
+                        <h6><i class="fa fa-camera-retro"></i> Photography Tips for Best Results</h6>
+                        <ul class="mb-0">
+                            <li>Face should be clearly visible and centered</li>
+                            <li>Good lighting from the front (avoid backlighting)</li>
+                            <li>No sunglasses or excessive facial hair changes</li>
+                            <li>Take the photo from a distance of ~1-2 meters</li>
+                            <li>Neutral expression or natural smile works best</li>
+                            <li>Avoid filters or heavy makeup</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-file-upload input[type="file"] {
+        padding: 10px;
+        border: 2px dashed #007bff;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+    }
+    
+    .custom-file-upload input[type="file"]:hover {
+        background-color: #f0f7ff;
+    }
+    
+    .img-thumbnail {
+        border: 2px solid #28a745;
+    }
+</style>
+{% endblock %}

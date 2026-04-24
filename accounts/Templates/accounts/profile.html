@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - SafeDetect{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">👤 My Profile</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Profile Picture Section -->
+                    <div class="text-center mb-4">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #007bff;">
+                            <p class="text-success mt-2"><i class="fa fa-check-circle"></i> Face Authenticated ✓</p>
+                        {% else %}
+                            <div class="bg-light rounded-circle d-inline-block" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa fa-camera fa-5x text-muted"></i>
+                            </div>
+                            <p class="text-warning mt-2"><i class="fa fa-exclamation-triangle"></i> No profile picture</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- User Information -->
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Username:</th>
+                                <td>{{ user.username }}</td>
+                            </tr>
+                            <tr>
+                                <th>First Name:</th>
+                                <td>{{ user.first_name|default:"Not set" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Last Name:</th>
+                                <td>{{ user.last_name|default:"Not set" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>{{ user.email|default:"Not set" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone:</th>
+                                <td>{{ user.phone_no|default:"Not set" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Face Authentication:</th>
+                                <td>
+                                    {% if user.profile_picture %}
+                                        <span class="badge bg-success">Enabled</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Disabled</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary">
+                            <i class="fa fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'accounts:upload_profile_picture' %}" class="btn btn-info">
+                            <i class="fa fa-camera"></i> Upload Profile Picture
+                        </a>
+                        <a href="{% url 'detection:dashboard' %}" class="btn btn-secondary">
+                            <i class="fa fa-dashboard"></i> Back to Dashboard
+                        </a>
+                    </div>
+
+                    <!-- Authentication Info -->
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="fa fa-info-circle"></i> Face Authentication</h6>
+                        <p>Upload a clear photo of your face to enable intruder detection authentication. When a face is detected in your security camera, it will be compared with your uploaded photo. If it matches, no alert will be sent!</p>
+                        {% if not user.profile_picture %}
+                            <strong>⚠️ Important:</strong> You haven't uploaded a profile picture yet. <a href="{% url 'accounts:upload_profile_picture' %}" class="alert-link">Upload one now</a> to enable face-based authentication.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

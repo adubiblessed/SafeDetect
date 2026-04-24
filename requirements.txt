@@ -3,3 +3,5 @@ ultralytics>=8.0.0
 pillow
 python-dotenv
 pyserial
+opencv-python
+djangorestframework

@@ -1,42 +1,277 @@
-<!-- templates/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeDetect Dashboard</title>
-    <meta http-equiv="refresh" content="10">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(18px);
+        }
+        .grid-bg {
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.14) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-6">
+<body class="min-h-screen bg-slate-950 text-slate-100 grid-bg">
+    <div class="absolute inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-24 left-10 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"></div>
+        <div class="absolute top-40 right-0 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl"></div>
+        <div class="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-500/15 blur-3xl"></div>
+    </div>
 
-{% if user.is_authenticated %}
-    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Intruder Detection Dashboard</h1>
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <header class="glass mb-6 rounded-3xl border border-white/10 p-6 shadow-2xl shadow-cyan-950/20">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">SafeDetect</p>
+                    <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">Intruder Dashboard</h1>
+                    <p class="mt-3 max-w-2xl text-sm text-slate-300 sm:text-base">
+                        Your account-scoped detection history, face-authentication status, and quick access to update your profile picture.
+                    </p>
+                </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {% for d in detections %}
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition duration-300">
-                <img src="{{ d.snapshot.url }}" alt="Snapshot" class="w-full h-48 object-cover">
-                <img src="{{ d.face_image.url }}" alt="Face Image" class="w-full h-32 object-cover mt-2">
-                <div class="p-4">
-                    <p class="text-sm text-gray-500">Detected at: {{ d.timestamp }}</p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:min-w-[420px]">
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Detections</p>
+                        <p id="detectionCount" class="mt-2 text-2xl font-semibold text-white">{{ detection_count|default:0 }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Profile Photo</p>
+                        <p class="mt-2 text-2xl font-semibold {% if profile_picture %}text-emerald-300{% else %}text-amber-300{% endif %}">
+                            {% if profile_picture %}Ready{% else %}Missing{% endif %}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400">User ID</p>
+                        <p class="mt-2 text-2xl font-semibold text-cyan-300">{{ current_user_id }}</p>
+                    </div>
                 </div>
             </div>
-        {% endfor %}
-    </div>
+        </header>
 
-{% else %}
-    <div class="flex flex-col items-center justify-center min-h-screen text-center">
-        <h1 class="text-3xl font-bold text-red-600 mb-4">Unauthorized Access</h1>
-        <a href="{% url 'accounts:login' %}" class="text-blue-500 underline hover:text-blue-700">
-            Login to continue
-        </a>
-    </div>
-{% endif %}
+        <section class="grid gap-6 lg:grid-cols-[360px_1fr]">
+            <aside class="glass rounded-3xl border border-white/10 p-5 shadow-xl shadow-slate-950/30">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-white">Profile</h2>
+                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">Account ID {{ current_user_id }}</span>
+                </div>
 
-<a href="{% url 'accounts:logout' %}" class="fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-200">
-    Logout
-</a>
+                <div class="mt-5 flex items-center gap-4">
+                    {% if profile_picture %}
+                        <img src="{{ profile_picture.url }}" alt="Profile picture" loading="lazy" decoding="async" class="h-24 w-24 rounded-2xl object-cover ring-4 ring-cyan-400/30">
+                    {% else %}
+                        <div class="flex h-24 w-24 items-center justify-center rounded-2xl border border-dashed border-slate-600 bg-slate-900 text-slate-400">
+                            <span class="text-3xl">+</span>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <p class="text-xl font-semibold text-white">{{ user.get_full_name|default:user.username }}</p>
+                        <p class="mt-1 text-xs uppercase tracking-[0.25em] text-slate-500">User ID {{ current_user_id }}</p>
+                        <p class="mt-1 text-sm text-slate-400">{{ user.email|default:"No email set" }}</p>
+                        <p class="mt-2 text-sm {% if profile_picture %}text-emerald-300{% else %}text-amber-300{% endif %}">
+                            {% if profile_picture %}Face authentication enabled{% else %}Upload a profile photo to enable face matching{% endif %}
+                        </p>
+                    </div>
+                </div>
 
+                <div class="mt-6 space-y-3">
+                    <a href="{% url 'accounts:upload_profile_picture' %}"
+                       class="flex items-center justify-center rounded-2xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">
+                        {% if profile_picture %}Update Profile Picture{% else %}Add Profile Picture for Detection{% endif %}
+                    </a>
+                    <a href="{% url 'accounts:profile' %}"
+                       class="flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-semibold text-white transition hover:bg-white/10">
+                        Manage Account
+                    </a>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/70 p-4 text-sm text-slate-300">
+                    <p class="font-semibold text-white">What this does</p>
+                    <p class="mt-2 leading-6">
+                        Only detections created for your account are shown here. If a detected face matches your uploaded profile photo, the system can skip intruder alerts.
+                    </p>
+                </div>
+            </aside>
+
+            <section class="glass rounded-3xl border border-white/10 p-5 shadow-xl shadow-slate-950/30">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-white">Your Detections</h2>
+                        <p class="mt-1 text-sm text-slate-400">Latest 24 records for your account only.</p>
+                    </div>
+                    <a href="{% url 'detection:upload_detection' %}"
+                       class="inline-flex items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-400/20">
+                        Upload New Media
+                    </a>
+                </div>
+
+                {% if detections %}
+                    <div id="detectionGrid" class="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        {% for d in detections %}
+                            <article data-detection-id="{{ d.id }}" class="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-lg shadow-black/20 transition hover:-translate-y-1 hover:border-cyan-400/30">
+                                <div class="grid grid-cols-1 gap-px bg-white/10">
+                                    <div class="relative aspect-[4/3] bg-slate-950">
+                                        <img src="{{ d.snapshot.url }}" alt="Snapshot" loading="lazy" decoding="async" class="h-full w-full object-cover">
+                                        <div class="absolute left-3 top-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-medium text-white">
+                                            Snapshot
+                                        </div>
+                                    </div>
+                                    <div class="relative aspect-[4/3] bg-slate-950">
+                                        <img src="{{ d.face_image.url }}" alt="Face image" loading="lazy" decoding="async" class="h-full w-full object-cover">
+                                        <div class="absolute left-3 top-3 rounded-full bg-cyan-400/90 px-3 py-1 text-xs font-semibold text-slate-950">
+                                            Face Crop
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 p-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <p class="text-sm font-medium text-white">{{ d.timestamp|date:"M d, Y H:i" }}</p>
+                                        <span class="rounded-full px-3 py-1 text-xs font-semibold {% if d.face_image %}bg-emerald-400/15 text-emerald-300{% else %}bg-slate-700 text-slate-300{% endif %}">
+                                            {% if d.face_image %}Stored{% else %}Pending{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3 text-xs text-slate-400">
+                                        <div class="rounded-2xl border border-white/5 bg-white/5 px-3 py-2">
+                                            <p class="uppercase tracking-[0.25em]">Snapshot</p>
+                                            <p class="mt-1 truncate text-slate-200">{{ d.snapshot.name|default:"Image" }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-white/5 bg-white/5 px-3 py-2">
+                                            <p class="uppercase tracking-[0.25em]">Face</p>
+                                            <p class="mt-1 truncate text-slate-200">{{ d.face_image.name|default:"Face" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div id="emptyState" class="mt-8 rounded-3xl border border-dashed border-white/15 bg-white/5 px-6 py-12 text-center">
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-400/10 text-3xl text-cyan-300">⟡</div>
+                        <h3 class="mt-4 text-xl font-semibold text-white">No detections yet</h3>
+                        <p class="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-400">
+                            Once your camera or uploads create detection records for this account, they will appear here only for you.
+                        </p>
+                        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                            <a href="{% url 'accounts:upload_profile_picture' %}"
+                               class="rounded-2xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">
+                                Add Profile Picture
+                            </a>
+                            <a href="{% url 'detection:upload_detection' %}"
+                               class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10">
+                                Upload Detection Media
+                            </a>
+                        </div>
+                    </div>
+                    <div id="detectionGrid" class="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3"></div>
+                {% endif %}
+            </section>
+        </section>
+    </main>
+
+    <a href="{% url 'accounts:logout' %}"
+       class="fixed bottom-4 right-4 rounded-full bg-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-950/30 transition hover:bg-rose-400">
+        Logout
+    </a>
+
+    <script>
+        (function () {
+            const grid = document.getElementById('detectionGrid');
+            const countEl = document.getElementById('detectionCount');
+            const emptyState = document.getElementById('emptyState');
+            const existingIds = new Set(
+                Array.from(document.querySelectorAll('[data-detection-id]')).map((el) => Number(el.dataset.detectionId))
+            );
+
+            function buildCard(d) {
+                const statusClass = d.has_face ? 'bg-emerald-400/15 text-emerald-300' : 'bg-slate-700 text-slate-300';
+                const statusText = d.has_face ? 'Stored' : 'Pending';
+
+                return `
+                    <article data-detection-id="${d.id}" class="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-lg shadow-black/20 transition hover:-translate-y-1 hover:border-cyan-400/30">
+                        <div class="grid grid-cols-1 gap-px bg-white/10">
+                            <div class="relative aspect-[4/3] bg-slate-950">
+                                <img src="${d.snapshot_url}" alt="Snapshot" loading="lazy" decoding="async" class="h-full w-full object-cover">
+                                <div class="absolute left-3 top-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-medium text-white">Snapshot</div>
+                            </div>
+                            <div class="relative aspect-[4/3] bg-slate-950">
+                                <img src="${d.face_url}" alt="Face image" loading="lazy" decoding="async" class="h-full w-full object-cover">
+                                <div class="absolute left-3 top-3 rounded-full bg-cyan-400/90 px-3 py-1 text-xs font-semibold text-slate-950">Face Crop</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 p-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="text-sm font-medium text-white">${d.timestamp_display}</p>
+                                <span class="rounded-full px-3 py-1 text-xs font-semibold ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-xs text-slate-400">
+                                <div class="rounded-2xl border border-white/5 bg-white/5 px-3 py-2">
+                                    <p class="uppercase tracking-[0.25em]">Snapshot</p>
+                                    <p class="mt-1 truncate text-slate-200">${d.snapshot_name}</p>
+                                </div>
+                                <div class="rounded-2xl border border-white/5 bg-white/5 px-3 py-2">
+                                    <p class="uppercase tracking-[0.25em]">Face</p>
+                                    <p class="mt-1 truncate text-slate-200">${d.face_name}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }
+
+            async function refreshDetections() {
+                try {
+                    const response = await fetch('{% url "detection:dashboard_data" %}', {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (countEl) {
+                        countEl.textContent = data.count;
+                    }
+
+                    const incoming = data.detections || [];
+                    const newItems = incoming.filter((item) => !existingIds.has(item.id));
+                    if (!newItems.length) {
+                        return;
+                    }
+
+                    if (emptyState) {
+                        emptyState.remove();
+                    }
+
+                    for (let i = newItems.length - 1; i >= 0; i--) {
+                        const item = newItems[i];
+                        grid.insertAdjacentHTML('afterbegin', buildCard(item));
+                        existingIds.add(item.id);
+                    }
+                } catch (error) {
+                    return;
+                }
+            }
+
+            setInterval(refreshDetections, 12000);
+        })();
+    </script>
 </body>
 </html>
