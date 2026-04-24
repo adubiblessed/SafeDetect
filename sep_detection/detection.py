@@ -3,6 +3,7 @@ import time
 import uuid
 import requests
 import os
+from pathlib import Path
 from queue import Queue
 from threading import Thread
 from datetime import datetime
@@ -10,11 +11,29 @@ from dotenv import load_dotenv
 from ultralytics import YOLO  
 
 
-model = YOLO("safe_detect 1.1.pt")  
+BASE_DIR = Path(__file__).resolve().parents[1]
+MODEL_PATH = BASE_DIR / "safe_detect 1.1.pt"
+YUNET_PATH = BASE_DIR / "yunet.onnx"
+
+
+def _validate_required_files():
+    missing = [str(p) for p in (MODEL_PATH, YUNET_PATH) if not p.exists()]
+    if missing:
+        missing_text = "\n".join(f"- {p}" for p in missing)
+        raise FileNotFoundError(
+            "Required model file(s) are missing:\n"
+            f"{missing_text}\n"
+            "Ensure these files exist locally in the project root before running detection.py."
+        )
+
+
+_validate_required_files()
+
+model = YOLO(str(MODEL_PATH))  
 
 
 face_detector = cv2.FaceDetectorYN.create(
-    model="yunet.onnx",
+    model=str(YUNET_PATH),
     config="",
     input_size=(320, 320),
     score_threshold=0.9,
@@ -25,7 +44,7 @@ face_detector = cv2.FaceDetectorYN.create(
 
 SNAPSHOT_INTERVAL = 10  
 API_URL = "http://127.0.0.1:8000/api/detections/"
-TMP_DIR = "temp"
+TMP_DIR = BASE_DIR / "temp"
 os.makedirs(TMP_DIR, exist_ok=True)
 
 

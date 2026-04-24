@@ -16,7 +16,7 @@ def run_yolo_detection(file_path):
         label = labels[label_id]                
         confidence = float(box.conf[0].item())  
 
-        if label in alert_classes and confidence > 0.5:
+        if label in alert_classes and confidence > 0.4:
             return {
                 'label': label,
                 'confidence': confidence,
