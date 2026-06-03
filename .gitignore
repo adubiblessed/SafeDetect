@@ -3,6 +3,7 @@ media/
 migrations/
 annotated/
 temp/
+logs/
 
 *.env
 *.pyc
